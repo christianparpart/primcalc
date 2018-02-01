@@ -23,6 +23,7 @@ enum class Precedence {
 class Expr {
  public:
   explicit Expr(Precedence p) : precedence_(p) {}
+  virtual ~Expr() {}
 
   Precedence precedence() const noexcept { return precedence_; }
 
