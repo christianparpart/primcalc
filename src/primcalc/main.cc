@@ -1,4 +1,4 @@
-// This file is part of the "primcalc" project, http://github.com/christianparpart/primcalc>
+// This file is part of the "primcalc" project, <http://github.com/christianparpart/primcalc>
 //   (c) 2018 Christian Parpart <christian@parpart.family>
 //
 // Licensed under the MIT License (the "License"); you may not use this
@@ -20,18 +20,22 @@ int main(int argc, const char *argv[]) {
     std::getline(std::cin, input);
 
     if (input.empty()) {
-      std::cout << "\nQuit.\n";
+      std::cout << "\nBye.\n";
       break;
     }
 
-    // auto [expr, err] = Parser::parse(input);
-    std::pair<std::unique_ptr<Expr>, std::error_code> parsed = Parser::parse(input);
-    if (!parsed.second) {
-      std::cout << "expr := " << AstPrinter::print(parsed.first.get()) << std::endl;
-      std::cout << "      = " << Calculator::calculate(parsed.first.get()) << std::endl;
-    } else {
-      std::cout << "Error. " << parsed.second << std::endl;
+    try {
+      std::unique_ptr<Expr> expr = Parser::parse(input);
+      std::cout << "expr := " << AstPrinter::print(expr.get()) << std::endl;
+      const Value result = Calculator::calculate(expr.get());
+      std::cout << "      = " << result << std::endl;
+    } catch (const ParserError& err) {
+      std::cout << "Parser error at column " << err.column() << ": "
+                << err.what() << std::endl;
+    } catch (const std::exception& err) {
+      std::cout << "Unhandled exception: " << err.what() << std::endl;
     }
   }
+
   return 0;
 }

@@ -33,7 +33,7 @@ AC_CHECK_FUNCS([backtrace])
 ####### OUTPUT ################################################################
 
 BASE_CXXFLAGS="-DXOPEN_SOURCE=600 -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE \
- -D_LARGEFILE_SOURCE -D_LARGE_FILES -Wall -Wextra -std=c++1y \
+ -D_LARGEFILE_SOURCE -D_LARGE_FILES -Wall -Wextra -std=c++11 \
  -Wno-unused-variable -Wno-unused-parameter"
 AC_SUBST([BASE_CXXFLAGS])
 

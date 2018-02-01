@@ -1,4 +1,4 @@
-// This file is part of the "primcalc" project, http://github.com/christianparpart/primcalc>
+// This file is part of the "primcalc" project, <http://github.com/christianparpart/primcalc>
 //   (c) 2018 Christian Parpart <christian@parpart.family>
 //
 // Licensed under the MIT License (the "License"); you may not use this
@@ -32,6 +32,11 @@ void Calculator::visit(MulExpr* e) {
 }
 
 void Calculator::visit(DivExpr* e) {
-  // XXX should handle division by 0 in real apps
-  result_ = calculate(e->left()) / calculate(e->right());
+  auto rhs = calculate(e->right());
+  auto lhs = calculate(e->left());
+
+  if (rhs == 0)
+    throw std::runtime_error("Division by 0.");
+
+  result_ = lhs / rhs;
 }

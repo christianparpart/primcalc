@@ -19,33 +19,36 @@ AM_CXXFLAGS = \
 	-I$(top_builddir)/src \
 	-I$(top_srcdir)/src
 
-AM_LDFLAGS = \
-	-lpthread
+####### libprimcalc ###########################################################
 
-# ####### libXzeroTesting_main.a ################################################
-# 
-# lib_LIBRARIES += libXzeroTesting_main.a
-# libXzeroTesting_main_a_SOURCES = src/xzero/testing_main.cc
+lib_LIBRARIES += libprimcalc.a
 
-####### primcalc ###################################################################
-
-bin_PROGRAMS += primcalc
-
-primcalc_CXXFLAGS = \
-	$(AM_CXXFLAGS) \
-	-I$(top_srcdir)/src
-
-primcalc_LDADD = \
-	$(AM_LDFLAGS)
-
-# primcalc_LDFLAGS += -static -static-libgcc -static-libstdc++
-
-primcalc_SOURCES = \
+libprimcalc_a_SOURCES = \
 	src/primcalc/ast.cc \
 	src/primcalc/ast_printer.cc \
 	src/primcalc/calculator.cc \
-	src/primcalc/parser.cc \
-	src/primcalc/main.cc
+	src/primcalc/parser.cc
 
-# vim:ts=8
+# XXX skipping headers for simplicity
+
+####### tests #################################################################
+
+TESTS += primcalc_test
+check_PROGRAMS += primcalc_test
+
+primcalc_test_SOURCES = \
+	src/primcalc/parser_test.cc \
+	src/primcalc/minitest.cc
+
+primcalc_test_LDADD = libprimcalc.a 
+
+####### primcalc ##############################################################
+
+bin_PROGRAMS += primcalc
+
+primcalc_CXXFLAGS = $(AM_CXXFLAGS) -I$(top_srcdir)/src
+primcalc_LDADD = libprimcalc.a
+primcalc_SOURCES = src/primcalc/main.cc
+
+# vim:ts=8:sw=8
 # EOF

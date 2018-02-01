@@ -1,4 +1,4 @@
-// This file is part of the "primcalc" project, http://github.com/christianparpart/primcalc>
+// This file is part of the "primcalc" project, <http://github.com/christianparpart/primcalc>
 //   (c) 2018 Christian Parpart <christian@parpart.family>
 //
 // Licensed under the MIT License (the "License"); you may not use this

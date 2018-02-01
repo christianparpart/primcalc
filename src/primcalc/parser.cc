@@ -1,4 +1,4 @@
-// This file is part of the "primcalc" project, http://github.com/christianparpart/primcalc>
+// This file is part of the "primcalc" project, <http://github.com/christianparpart/primcalc>
 //   (c) 2018 Christian Parpart <christian@parpart.family>
 //
 // Licensed under the MIT License (the "License"); you may not use this
@@ -7,23 +7,27 @@
 
 #include <primcalc/parser.h>
 #include <primcalc/ast.h>
+#include <primcalc/utils.h>
 
 Parser::Parser(const std::string& input)
       : expression_(input), currentToken_(expression_.cbegin()) {
 
   // skip whitespace
-  if (currentToken_ != expression_.cend() && std::isspace(*currentToken_)) {
+  while (!eof() && std::isspace(*currentToken_)) {
     currentToken_++;
   }
+
+  validateToken();
 }
 
-std::pair<std::unique_ptr<Expr>, std::error_code> Parser::parse(const std::string& input) {
-  std::pair<std::unique_ptr<Expr>, std::error_code> result;
-
+std::unique_ptr<Expr> Parser::parse(const std::string& input) {
   Parser parser(input);
-  result.first = parser.expr();
+  auto expr = parser.expr();
 
-  return result;
+  if (!parser.eof())
+    throw ParserError(parser.column(), "Unexpected token at the end of expression.");
+
+  return expr;
 }
 
 std::unique_ptr<Expr> Parser::expr() {
@@ -33,7 +37,7 @@ std::unique_ptr<Expr> Parser::expr() {
 std::unique_ptr<Expr> Parser::addExpr() {
   auto lhs = mulExpr();
 
-  while (currentToken_ != expression_.cend()) {
+  while (!eof()) {
     switch (*currentToken_) {
       case '+':
         nextToken();
@@ -53,7 +57,7 @@ std::unique_ptr<Expr> Parser::addExpr() {
 std::unique_ptr<Expr> Parser::mulExpr() {
   auto lhs = primaryExpr();
 
-  while (currentToken_ != expression_.cend()) {
+  while (!eof()) {
     switch (*currentToken_) {
       case '*':
         nextToken();
@@ -71,8 +75,8 @@ std::unique_ptr<Expr> Parser::mulExpr() {
 }
 
 std::unique_ptr<Expr> Parser::primaryExpr() {
-  if (currentToken_ == expression_.cend())
-    return nullptr; // TODO EOF
+  if (eof())
+    throw ParserError(column(), "Unexpected EOF in primary expression");
 
   if (std::isdigit(*currentToken_)) {
     Value value = *currentToken_ - '0';
@@ -87,19 +91,44 @@ std::unique_ptr<Expr> Parser::primaryExpr() {
       nextToken();
       return subExpr;
     } else {
-      return nullptr; // TODO parse error
+      throw ParserError(column(), "Unexpected token. Expected ')' instead.");
     }
   }
 
-  return nullptr; // TODO parse error
+  throw ParserError(column(), "Unexpected token in primary expression");
 }
 
 void Parser::nextToken() {
-  if (currentToken_ != expression_.cend())
+  if (!eof())
     currentToken_++;
 
   // skip whitespace
-  if (currentToken_ != expression_.cend() && std::isspace(*currentToken_)) {
+  while (!eof() && std::isspace(*currentToken_))
     currentToken_++;
+
+  validateToken();
+}
+
+void Parser::validateToken() {
+  static std::string validSymbols = "+-*/()0123456789";
+
+  if (eof())
+    return;
+
+  if (std::isdigit(*currentToken_)) {
+    auto peek = std::next(currentToken_);
+    if (peek != expression_.cend() && std::isdigit(*peek)) {
+      throw ParserError(column(), "Multidigit numbers are not supported.");
+    }
+  } else if (validSymbols.find(*currentToken_) == std::string::npos) {
+    throw ParserError(column(), "Invalid input.");
   }
+}
+
+bool Parser::eof() const {
+  return currentToken_ == expression_.cend();
+}
+
+int Parser::column() const {
+  return 1 + std::distance(expression_.cbegin(), currentToken_);
 }
