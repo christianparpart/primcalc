@@ -40,8 +40,8 @@ make check   # compiles and runs unit tests
 ./primcalc
 ```
 
-Home Assignment Notes
----------------------
+Notes
+-----
 
 - I've chosen simplicity over complexity (to only match the required capabilities)
 - Error handling has been done via exceptions, I like `std::error_code` too, but
